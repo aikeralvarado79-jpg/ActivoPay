@@ -1,0 +1,2732 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Humboldt Flight Control & Dashboard Corporativo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para Iconografía de Última Generación -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Chart.js para Visualización de Datos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      /* Personalización de scrollbar premium */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 8px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      /* Efectos de Glassmorphism */
+      .glass-panel {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-slate-50 text-slate-800 min-h-screen flex flex-col overflow-hidden"
+  >
+    <!-- CONTENEDOR PRINCIPAL CON DISTRIBUCIÓN SIDEBAR + CONTENIDO -->
+    <div class="flex-1 flex overflow-hidden">
+      <!-- PANEL LATERAL DE NAVEGACIÓN (SIDEBAR) -->
+      <aside
+        class="w-64 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800 shrink-0 hidden md:flex"
+      >
+        <!-- Header de la Aplicación -->
+        <div class="p-5 border-b border-slate-800">
+          <div class="flex items-center space-x-3 mb-1">
+            <div
+              class="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/20"
+            >
+              <i class="fa-solid fa-plane-departure text-lg"></i>
+            </div>
+            <div>
+              <span class="font-bold text-base text-white block leading-tight"
+                >Humboldt Flight</span
+              >
+              <span class="text-[10px] text-slate-400 font-medium"
+                >Control de Prepago</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Menú de Navegación -->
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+          <p
+            class="text-[10px] font-bold text-slate-500 uppercase px-3 mb-2 tracking-wider"
+          >
+            Módulos
+          </p>
+
+          <button
+            onclick="switchView('view-dashboard')"
+            id="nav-dashboard"
+            class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-white bg-slate-800 hover:bg-slate-800 transition-all duration-150"
+          >
+            <i class="fa-solid fa-chart-pie text-blue-500 w-5 text-center"></i>
+            <span>Dashboard General</span>
+          </button>
+
+          <button
+            onclick="switchView('view-extractor')"
+            id="nav-extractor"
+            class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-150"
+          >
+            <i
+              class="fa-solid fa-wand-magic-sparkles text-purple-500 w-5 text-center"
+            ></i>
+            <span>Extractor de PDFs</span>
+          </button>
+
+          <button
+            onclick="switchView('view-historial')"
+            id="nav-historial"
+            class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-150"
+          >
+            <i class="fa-solid fa-database text-amber-500 w-5 text-center"></i>
+            <span>Historial de Vuelos</span>
+          </button>
+
+          <button
+            onclick="switchView('view-soporte')"
+            id="nav-soporte"
+            class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-150"
+          >
+            <div class="flex items-center space-x-3">
+              <i
+                class="fa-solid fa-comments text-emerald-500 w-5 text-center"
+              ></i>
+              <span>Soporte & Chat</span>
+            </div>
+            <span
+              id="chat-badge"
+              class="bg-red-500 text-white text-[9px] px-1.5 py-0.2 rounded-full font-bold"
+              >1</span
+            >
+          </button>
+
+          <p
+            class="text-[10px] font-bold text-slate-500 uppercase px-3 pt-6 mb-2 tracking-wider"
+          >
+            Ayuda & Manuales
+          </p>
+
+          <button
+            onclick="switchView('view-ayuda')"
+            id="nav-ayuda"
+            class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-150"
+          >
+            <i
+              class="fa-solid fa-circle-question text-sky-500 w-5 text-center"
+            ></i>
+            <span>Guía de Instrucciones</span>
+          </button>
+        </nav>
+
+        <!-- Perfil del Usuario / Acciones de Configuración -->
+        <div class="p-4 border-t border-slate-800 space-y-3">
+          <div class="flex items-center space-x-3 px-2">
+            <div class="relative">
+              <div
+                class="h-9 w-9 rounded-full bg-slate-700 flex items-center justify-center font-bold text-sm text-white border border-slate-600"
+              >
+                GC
+              </div>
+              <span
+                class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-slate-900"
+              ></span>
+            </div>
+            <div class="overflow-hidden">
+              <span class="font-semibold text-xs text-white block truncate"
+                >Gamma Chemical</span
+              >
+              <span class="text-[10px] text-slate-500 block truncate"
+                >Administrador</span
+              >
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button
+              onclick="openConfig()"
+              class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold py-1.5 px-2 rounded-lg transition flex items-center justify-center space-x-1"
+            >
+              <i class="fa-solid fa-gear"></i>
+              <span>Ajustes</span>
+            </button>
+            <button
+              onclick="logoutSim()"
+              class="bg-rose-900/40 hover:bg-rose-900/60 text-rose-300 text-[10px] font-bold py-1.5 px-2 rounded-lg transition flex items-center justify-center space-x-1"
+            >
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span>Salir</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ÁREA PRINCIPAL DE CONTENIDO CON SCROLL INDEPENDIENTE -->
+      <main class="flex-1 flex flex-col overflow-hidden">
+        <!-- HEADER DE APLICACIÓN CON ALERTA PREVENTIVA -->
+        <header
+          class="bg-white border-b border-slate-200 h-16 shrink-0 flex items-center justify-between px-6 z-20"
+        >
+          <div class="flex items-center space-x-4">
+            <!-- Botón Hamburguesa para móviles -->
+            <button
+              class="md:hidden text-slate-600"
+              onclick="toggleMobileMenu()"
+            >
+              <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <h1 id="view-title" class="text-base font-bold text-slate-800">
+              Dashboard de Consolidación Financiera
+            </h1>
+          </div>
+
+          <!-- Alarma de Saldo Preventivo en Tiempo Real -->
+          <div class="flex items-center space-x-4">
+            <!-- Selector de Idioma -->
+            <div class="relative inline-block text-left">
+              <button
+                onclick="toggleDropdown('lang-dropdown')"
+                class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 transition"
+              >
+                <i class="fa-solid fa-globe text-slate-500"></i>
+                <span id="current-lang">ES (Sím)</span>
+                <i
+                  class="fa-solid fa-chevron-down text-[9px] text-slate-400"
+                ></i>
+              </button>
+              <div
+                id="lang-dropdown"
+                class="hidden absolute right-0 mt-2 w-32 bg-white border border-slate-200 rounded-lg shadow-lg py-1 z-50"
+              >
+                <button
+                  onclick="changeLanguage('ES')"
+                  class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-50 flex items-center space-x-2"
+                >
+                  <span class="font-medium text-slate-800">Español</span>
+                </button>
+                <button
+                  onclick="changeLanguage('EN')"
+                  class="w-full text-left px-3 py-1.5 text-xs hover:bg-slate-50 flex items-center space-x-2"
+                >
+                  <span class="font-medium text-slate-800">English (Sim)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Alarma de Estado -->
+            <div
+              id="saldo-alert-banner"
+              class="flex items-center space-x-3 px-4 py-2 rounded-full border transition-all duration-300"
+            >
+              <span
+                id="saldo-alert-dot"
+                class="h-3 w-3 rounded-full animate-pulse"
+              ></span>
+              <div class="text-xs">
+                <span class="font-medium text-slate-500 hidden sm:inline"
+                  >Saldo Prepago:</span
+                >
+                <span
+                  id="header-saldo-value"
+                  class="font-bold text-slate-950 ml-1"
+                  >$0.00</span
+                >
+              </div>
+              <span
+                id="saldo-alert-badge"
+                class="text-[9px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider"
+              ></span>
+            </div>
+          </div>
+        </header>
+
+        <!-- MENÚ MÓVIL REPLEGABLE -->
+        <div
+          id="mobile-menu"
+          class="hidden md:hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50"
+        >
+          <div
+            class="w-64 bg-slate-900 h-full p-5 flex flex-col justify-between"
+          >
+            <div class="space-y-6">
+              <div
+                class="flex justify-between items-center pb-4 border-b border-slate-800"
+              >
+                <span class="font-bold text-white text-md"
+                  >Humboldt Control</span
+                >
+                <button
+                  onclick="toggleMobileMenu()"
+                  class="text-slate-400 text-lg"
+                >
+                  &times;
+                </button>
+              </div>
+              <nav class="space-y-2">
+                <button
+                  onclick="
+                    switchView('view-dashboard');
+                    toggleMobileMenu();
+                  "
+                  class="w-full text-left flex items-center space-x-3 py-2.5 px-3 rounded-xl text-xs font-semibold text-white bg-slate-800"
+                >
+                  <i class="fa-solid fa-chart-pie text-blue-500"></i>
+                  <span>Dashboard General</span>
+                </button>
+                <button
+                  onclick="
+                    switchView('view-extractor');
+                    toggleMobileMenu();
+                  "
+                  class="w-full text-left flex items-center space-x-3 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  <i
+                    class="fa-solid fa-wand-magic-sparkles text-purple-500"
+                  ></i>
+                  <span>Extractor de PDFs</span>
+                </button>
+                <button
+                  onclick="
+                    switchView('view-historial');
+                    toggleMobileMenu();
+                  "
+                  class="w-full text-left flex items-center space-x-3 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  <i class="fa-solid fa-database text-amber-500"></i>
+                  <span>Historial de Vuelos</span>
+                </button>
+                <button
+                  onclick="
+                    switchView('view-soporte');
+                    toggleMobileMenu();
+                  "
+                  class="w-full text-left flex items-center space-x-3 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  <i class="fa-solid fa-comments text-emerald-500"></i>
+                  <span>Soporte & Chat</span>
+                </button>
+                <button
+                  onclick="
+                    switchView('view-ayuda');
+                    toggleMobileMenu();
+                  "
+                  class="w-full text-left flex items-center space-x-3 py-2.5 px-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  <i class="fa-solid fa-circle-question text-sky-500"></i>
+                  <span>Guía de Instrucciones</span>
+                </button>
+              </nav>
+            </div>
+            <div class="pt-4 border-t border-slate-800">
+              <button
+                onclick="logoutSim()"
+                class="w-full bg-rose-900/40 text-rose-300 text-xs py-2 rounded-xl font-bold flex items-center justify-center space-x-2"
+              >
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Cerrar Sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTENEDOR CENTRAL DE PANTALLAS (SWITCHABLE PANELS) -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+          <!-- 1. VISTA: DASHBOARD GENERAL -->
+          <div id="view-dashboard" class="space-y-6">
+            <!-- KPI Cards Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              <!-- Card: Saldo Consolidado -->
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between hover:shadow-md transition"
+              >
+                <div>
+                  <span
+                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block"
+                    >Saldo Disponible</span
+                  >
+                  <h3
+                    id="kpi-saldo"
+                    class="text-2xl font-bold text-slate-900 mt-1"
+                  >
+                    $0.00
+                  </h3>
+                  <p class="text-[10px] text-slate-500 mt-1 flex items-center">
+                    <span
+                      id="kpi-saldo-trend"
+                      class="font-semibold text-emerald-600 mr-1"
+                      ><i class="fa-solid fa-shield"></i> Seguro</span
+                    >
+                    <span>en prepagos</span>
+                  </p>
+                </div>
+                <div class="bg-blue-50 text-blue-600 p-3.5 rounded-xl">
+                  <i class="fa-solid fa-wallet text-xl"></i>
+                </div>
+              </div>
+
+              <!-- Card: Total Abonos (Debe) -->
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between hover:shadow-md transition"
+              >
+                <div>
+                  <span
+                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block"
+                    >Total Abonos (Debe)</span
+                  >
+                  <h3
+                    id="kpi-debe"
+                    class="text-2xl font-bold text-emerald-600 mt-1"
+                  >
+                    $0.00
+                  </h3>
+                  <span
+                    id="kpi-count-abonos"
+                    class="text-[10px] text-slate-500 mt-1 block"
+                    >0 depósitos registrados</span
+                  >
+                </div>
+                <div class="bg-emerald-50 text-emerald-600 p-3.5 rounded-xl">
+                  <i class="fa-solid fa-piggy-bank text-xl"></i>
+                </div>
+              </div>
+
+              <!-- Card: Gastos Consumidos (Haber) -->
+              <div
+                class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between hover:shadow-md transition"
+              >
+                <div>
+                  <span
+                    class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block"
+                    >Consumo Vuelos (Haber)</span
+                  >
+                  <h3
+                    id="kpi-haber"
+                    class="text-2xl font-bold text-rose-600 mt-1"
+                  >
+                    $0.00
+                  </h3>
+                  <span
+                    id="kpi-count-vuelos"
+                    class="text-[10px] text-slate-500 mt-1 block"
+                    >0 boletos procesados</span
+                  >
+                </div>
+                <div class="bg-rose-50 text-rose-600 p-3.5 rounded-xl">
+                  <i class="fa-solid fa-receipt text-xl"></i>
+                </div>
+              </div>
+
+              <!-- Card: Acciones Rápidas -->
+              <div
+                class="bg-gradient-to-tr from-slate-950 via-slate-900 to-slate-800 p-5 rounded-2xl text-white shadow-lg flex flex-col justify-between"
+              >
+                <div>
+                  <span
+                    class="text-[10px] font-bold text-slate-300 uppercase tracking-wider block"
+                    >Fondeos & Gastos</span
+                  >
+                  <p class="text-[10px] text-slate-400 mt-0.5">
+                    Gestión manual inmediata de fondos corporativos.
+                  </p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-4">
+                  <button
+                    onclick="openModal('modal-abono')"
+                    class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-[10px] flex items-center justify-center space-x-1.5 transition active:scale-95 shadow-lg shadow-emerald-900/20"
+                  >
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>Abonar</span>
+                  </button>
+                  <button
+                    onclick="openModal('modal-vuelo-manual')"
+                    class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-xl text-[10px] flex items-center justify-center space-x-1.5 transition active:scale-95 shadow-lg shadow-blue-900/20"
+                  >
+                    <i class="fa-solid fa-plane"></i>
+                    <span>Vuelo Manual</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gráficos de Análisis Financiero -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <!-- Col: Gráfico Principal -->
+              <div
+                class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-[360px]"
+              >
+                <div class="flex justify-between items-center">
+                  <div>
+                    <h3 class="text-sm font-bold text-slate-900">
+                      Historial de Flujo de Caja
+                    </h3>
+                    <p class="text-xs text-slate-400">
+                      Distribución de abonos (Debe) vs consumos por boletos
+                      (Haber).
+                    </p>
+                  </div>
+                  <div
+                    class="bg-slate-50 px-2 py-1 rounded-lg border border-slate-200"
+                  >
+                    <span class="text-[10px] font-bold text-slate-600 uppercase"
+                      >Período Activo: 2026</span
+                    >
+                  </div>
+                </div>
+                <div class="flex-1 mt-4 relative">
+                  <canvas
+                    id="dashboardBarChart"
+                    class="w-full h-full max-h-[240px]"
+                  ></canvas>
+                </div>
+              </div>
+
+              <!-- Col: Distribución de Vuelos y Tipos -->
+              <div
+                class="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-[360px]"
+              >
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">
+                    Distribución de Territorio
+                  </h3>
+                  <p class="text-xs text-slate-400">
+                    Balance geográfico de vuelos emitidos.
+                  </p>
+                </div>
+                <div
+                  class="flex-1 my-4 flex items-center justify-center relative"
+                >
+                  <canvas
+                    id="dashboardPieChart"
+                    class="max-h-[170px] max-w-[170px]"
+                  ></canvas>
+                </div>
+                <div
+                  class="grid grid-cols-2 gap-2 text-center text-xs border-t border-slate-100 pt-3"
+                >
+                  <div>
+                    <span
+                      class="block text-[10px] text-slate-400 font-semibold uppercase"
+                      >Nacionales</span
+                    >
+                    <span
+                      id="txt-count-nac"
+                      class="font-bold text-blue-600 text-sm"
+                      >0</span
+                    >
+                  </div>
+                  <div>
+                    <span
+                      class="block text-[10px] text-slate-400 font-semibold uppercase"
+                      >Internacionales</span
+                    >
+                    <span
+                      id="txt-count-int"
+                      class="font-bold text-purple-600 text-sm"
+                      >0</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sección: Pasajeros Frecuentes e Indicaciones Rápidas -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <!-- Pasajeros Frecuentes -->
+              <div
+                class="lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between h-[340px]"
+              >
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">
+                    Pasajeros Frecuentes (Gamma Chemical Corp)
+                  </h3>
+                  <p class="text-xs text-slate-400">
+                    Listado de personas asociadas a gastos de vuelo.
+                  </p>
+                </div>
+                <div
+                  class="flex-1 overflow-y-auto mt-4 space-y-3 pr-2"
+                  id="db-passenger-list"
+                >
+                  <!-- Dinámico -->
+                </div>
+              </div>
+
+              <!-- Atajos y Alerta Rápida -->
+              <div
+                class="lg:col-span-6 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-100/50 flex flex-col justify-between h-[340px]"
+              >
+                <div class="space-y-3">
+                  <div
+                    class="bg-blue-600 text-white p-2 rounded-xl inline-block"
+                  >
+                    <i class="fa-solid fa-lightbulb text-lg"></i>
+                  </div>
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    Consejos del Consolidador Humboldt
+                  </h4>
+                  <ul
+                    class="text-xs text-slate-600 space-y-2 list-disc list-inside"
+                  >
+                    <li>
+                      Para evitar el cobro de
+                      <strong class="text-blue-700">Fees administrativos</strong
+                      >, consolide múltiples boletos en una sola emisión
+                      semanal.
+                    </li>
+                    <li>
+                      Verifique que los montos de
+                      <strong class="text-emerald-700">Debe</strong> (abono)
+                      correspondan a la referencia bancaria registrada.
+                    </li>
+                    <li>
+                      El módulo extractor procesa PDF side-by-side reduciendo la
+                      carga manual de datos.
+                    </li>
+                  </ul>
+                </div>
+                <div
+                  class="bg-white p-4 rounded-xl border border-blue-100 flex items-center justify-between"
+                >
+                  <div class="flex items-center space-x-3">
+                    <i
+                      class="fa-solid fa-circle-info text-blue-500 text-lg"
+                    ></i>
+                    <div>
+                      <span class="text-xs font-bold text-slate-800 block"
+                        >¿Saldos por debajo de $1,000.00?</span
+                      >
+                      <span class="text-[10px] text-slate-500 block"
+                        >El sistema activará una alerta amarilla
+                        automática.</span
+                      >
+                    </div>
+                  </div>
+                  <button
+                    onclick="openModal('modal-abono')"
+                    class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-3 py-1.5 rounded-lg transition shrink-0"
+                  >
+                    Abonar ya
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. VISTA: EXTRACTOR DE PDF (SIDE-BY-SIDE) -->
+          <div id="view-extractor" class="hidden space-y-6">
+            <div
+              class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+            >
+              <!-- Header del Extractor -->
+              <div
+                class="border-b border-slate-200 bg-slate-50/50 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+              >
+                <div>
+                  <h2
+                    class="text-base font-bold text-slate-900 flex items-center space-x-2"
+                  >
+                    <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                    <span>Procesamiento Automatizado de PDF (Lado a Lado)</span>
+                  </h2>
+                  <p class="text-xs text-slate-500 mt-0.5">
+                    Carga el PDF que envía la Agencia Humboldt o haz clic en un
+                    ejemplo para simular la detección OCR instantánea.
+                  </p>
+                </div>
+                <div class="flex items-center space-x-2 w-full sm:w-auto">
+                  <span
+                    class="text-xs font-medium text-slate-500 hidden lg:inline"
+                    >Preseteados Humboldt:</span
+                  >
+                  <button
+                    onclick="simulatePdfExtraction(1)"
+                    class="flex-1 sm:flex-initial bg-white border border-slate-200 hover:bg-slate-100 text-[11px] px-3 py-1.5 rounded-xl font-semibold text-slate-700 shadow-sm transition flex items-center justify-center space-x-1.5"
+                  >
+                    <span>📄 Factura 117845</span>
+                    <span
+                      class="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.2 rounded-full"
+                      >Boletos</span
+                    >
+                  </button>
+                  <button
+                    onclick="simulatePdfExtraction(2)"
+                    class="flex-1 sm:flex-initial bg-white border border-slate-200 hover:bg-slate-100 text-[11px] px-3 py-1.5 rounded-xl font-semibold text-slate-700 shadow-sm transition flex items-center justify-center space-x-1.5"
+                  >
+                    <span>📄 Factura 117846</span>
+                    <span
+                      class="bg-amber-100 text-amber-700 text-[9px] px-1.5 py-0.2 rounded-full"
+                      >Fees</span
+                    >
+                  </button>
+                </div>
+              </div>
+
+              <!-- Split Screen Config -->
+              <div
+                class="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 h-[620px]"
+              >
+                <!-- Lado Izquierdo: Render del PDF -->
+                <div
+                  class="lg:col-span-5 bg-slate-100 flex flex-col h-full overflow-hidden"
+                >
+                  <div
+                    class="bg-slate-200 px-4 py-2 flex items-center justify-between border-b border-slate-300 shrink-0"
+                  >
+                    <div class="flex items-center space-x-2">
+                      <span class="h-2.5 w-2.5 rounded-full bg-red-500"></span>
+                      <span
+                        id="pdf-filename"
+                        class="text-xs font-mono text-slate-600 truncate max-w-[150px]"
+                        >sin_archivo.pdf</span
+                      >
+                    </div>
+                    <div
+                      class="flex items-center space-x-3 text-slate-500 text-xs"
+                    >
+                      <button
+                        class="hover:text-slate-800"
+                        onclick="simulateZoom(-10)"
+                      >
+                        <i class="fa-solid fa-magnifying-glass-minus"></i>
+                      </button>
+                      <span id="pdf-zoom">100%</span>
+                      <button
+                        class="hover:text-slate-800"
+                        onclick="simulateZoom(10)"
+                      >
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    class="flex-1 overflow-y-auto p-4 flex justify-center items-start bg-slate-200/50"
+                    id="pdf-visualizer-container"
+                  >
+                    <!-- Estado inicial sin archivo -->
+                    <div
+                      id="pdf-empty-state"
+                      class="my-auto text-center p-6 space-y-4"
+                    >
+                      <div
+                        class="h-16 w-16 bg-white rounded-full flex items-center justify-center mx-auto shadow-md"
+                      >
+                        <i
+                          class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400"
+                        ></i>
+                      </div>
+                      <div>
+                        <p class="text-sm font-semibold text-slate-700">
+                          Arrastre o cargue el PDF
+                        </p>
+                        <p class="text-xs text-slate-400 mt-1 max-w-[240px]">
+                          Use los botones de demostración o simule la carga de
+                          un documento para activar el visualizador.
+                        </p>
+                      </div>
+                      <div class="pt-2">
+                        <label
+                          class="bg-blue-600 hover:bg-blue-700 transition text-white text-xs font-bold px-4 py-2.5 rounded-xl cursor-pointer shadow-md inline-block"
+                        >
+                          <span>Seleccionar Archivo</span>
+                          <input
+                            type="file"
+                            class="hidden"
+                            accept=".pdf,.txt"
+                            onchange="handleFileUpload(event)"
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Plantilla de Factura Renderizada en HTML para simular PDF -->
+                    <div
+                      id="pdf-rendered-sheet"
+                      class="hidden w-full max-w-sm bg-white p-5 rounded-lg border border-slate-300 shadow-lg text-[10px] leading-relaxed relative font-sans"
+                    >
+                      <div
+                        class="flex justify-between items-start border-b border-slate-200 pb-3"
+                      >
+                        <div>
+                          <h4 class="font-bold text-slate-900 text-sm">
+                            VIAJES Humboldt
+                          </h4>
+                          <p class="text-[8px] text-slate-400 font-semibold">
+                            Lufthansa City Center
+                          </p>
+                        </div>
+                        <div class="text-right">
+                          <p
+                            class="font-bold text-slate-900 text-[8px] uppercase"
+                          >
+                            Factura N°
+                          </p>
+                          <p
+                            id="pdf-render-invoice-num"
+                            class="text-base font-mono text-blue-600 font-bold"
+                          >
+                            117845
+                          </p>
+                          <p class="text-[8px] text-slate-400">
+                            Fecha:
+                            <span id="pdf-render-invoice-date" class="font-bold"
+                              >13/03/2026</span
+                            >
+                          </p>
+                        </div>
+                      </div>
+
+                      <div
+                        class="grid grid-cols-2 gap-2 my-3 text-[8px] text-slate-500"
+                      >
+                        <div>
+                          <p class="font-bold text-slate-700">EMISOR:</p>
+                          <p class="font-bold text-slate-600">
+                            AGENCIA DE VIAJES HUMBOLDT
+                          </p>
+                          <p>
+                            AV. LA ESTANCIA EDIF. TORRE LAS MERCEDES PISO 2 URB.
+                            CHUAO CARACAS
+                          </p>
+                          <p>RIF: J000420530</p>
+                        </div>
+                        <div>
+                          <p class="font-bold text-slate-700">FACTURADO A:</p>
+                          <p class="font-bold text-slate-600">
+                            GAMMA CHEMICAL CORP
+                          </p>
+                          <p>1931 NW 150 TH AVE SUITE 126 MIAMI, FLORIDA, US</p>
+                          <p>Customer ID: 58767</p>
+                        </div>
+                      </div>
+
+                      <div
+                        class="border border-slate-200 rounded-lg overflow-hidden my-3"
+                      >
+                        <table class="w-full text-left text-[8px]">
+                          <thead class="bg-slate-100 text-slate-600 font-bold">
+                            <tr>
+                              <th class="p-1.5">
+                                Descripción del Boleto / Cargos
+                              </th>
+                              <th class="p-1.5 text-right">Tarifa</th>
+                              <th class="p-1.5 text-right">Tasa</th>
+                              <th class="p-1.5 text-right">Total</th>
+                            </tr>
+                          </thead>
+                          <tbody
+                            id="pdf-render-tbody"
+                            class="divide-y divide-slate-100"
+                          >
+                            <!-- Dinámico -->
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div
+                        class="flex justify-between items-center pt-2.5 border-t border-slate-200 text-right"
+                      >
+                        <span class="font-bold text-slate-500"
+                          >TOTAL USD CONSOLIDADO:</span
+                        >
+                        <span
+                          id="pdf-render-total"
+                          class="font-bold text-slate-900 text-sm"
+                          >$194.00</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Lado Derecho: Formulario de Validación OCR -->
+                <div
+                  class="lg:col-span-7 flex flex-col h-full overflow-hidden bg-white"
+                >
+                  <div
+                    class="px-6 py-3.5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50 shrink-0"
+                  >
+                    <span
+                      class="text-xs font-bold uppercase tracking-wider text-slate-500"
+                      >Formulario de Validación y Corrección Humana</span
+                    >
+                    <span
+                      id="extraction-status"
+                      class="bg-slate-100 text-slate-500 text-[10px] px-2.5 py-0.5 rounded-full font-bold"
+                      >Sin archivo</span
+                    >
+                  </div>
+
+                  <div
+                    id="pdf-extraction-form"
+                    class="flex-1 overflow-y-auto p-6 space-y-6"
+                  >
+                    <!-- Estado vacío inicial -->
+                    <div
+                      id="extraction-empty"
+                      class="text-center py-20 text-slate-400 space-y-3"
+                    >
+                      <i
+                        class="fa-solid fa-spell-check text-4xl text-slate-200"
+                      ></i>
+                      <p class="text-xs font-semibold text-slate-600">
+                        Esperando procesamiento de datos
+                      </p>
+                      <p class="text-[11px] max-w-sm mx-auto">
+                        Cuando se active el OCR, aquí podrá modificar
+                        manualmente cualquier campo que la lectura automática
+                        haya detectado erróneamente.
+                      </p>
+                    </div>
+
+                    <!-- Contenedor dinámico de filas extraídas -->
+                    <div id="extracted-rows-container" class="hidden space-y-6">
+                      <!-- Formularios inyectados -->
+                    </div>
+                  </div>
+
+                  <!-- Barra inferior de confirmación -->
+                  <div
+                    class="p-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between shrink-0"
+                  >
+                    <div class="text-xs text-slate-500">
+                      Registros listos:
+                      <span
+                        id="extraction-summary-count"
+                        class="font-bold text-slate-800"
+                        >0</span
+                      >
+                      fila(s).
+                    </div>
+                    <div class="flex space-x-2">
+                      <button
+                        onclick="resetPdfExtractor()"
+                        class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-200/60 rounded-xl transition"
+                      >
+                        Descartar
+                      </button>
+                      <button
+                        id="btn-confirm-extraction"
+                        onclick="saveExtractedData()"
+                        disabled
+                        class="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed transition text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md flex items-center space-x-1.5"
+                      >
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Guardar en Historial</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. VISTA: HISTORIAL DE TRANSACCIONES -->
+          <div id="view-historial" class="hidden space-y-6">
+            <div
+              class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
+            >
+              <!-- Panel Superior de Filtros -->
+              <div
+                class="p-6 border-b border-slate-200 bg-slate-50/50 space-y-4"
+              >
+                <div
+                  class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
+                >
+                  <div>
+                    <h2
+                      class="text-base font-bold text-slate-900 flex items-center space-x-2"
+                    >
+                      <i class="fa-solid fa-list-check text-slate-600"></i>
+                      <span>Buscador y Control de Transacciones</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                      Filtros dinámicos en tiempo real para auditorías de caja.
+                    </p>
+                  </div>
+                  <div class="flex space-x-2 w-full sm:w-auto">
+                    <button
+                      onclick="exportDataExcelSim()"
+                      class="flex-1 sm:flex-initial bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs px-3.5 py-2 rounded-xl font-bold shadow-sm transition flex items-center justify-center space-x-1.5"
+                    >
+                      <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                      <span>Descargar Excel</span>
+                    </button>
+                    <button
+                      onclick="clearDatabase()"
+                      class="flex-1 sm:flex-initial bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs px-3.5 py-2 rounded-xl font-bold transition flex items-center justify-center space-x-1.5"
+                    >
+                      <i class="fa-solid fa-trash-can"></i>
+                      <span>Formatear Historial</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Inputs Filtros -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 pt-2">
+                  <!-- Búsqueda Global -->
+                  <div class="relative">
+                    <i
+                      class="fa-solid fa-magnifying-glass text-slate-400 absolute left-3 top-3 text-sm"
+                    ></i>
+                    <input
+                      type="text"
+                      id="filter-search"
+                      oninput="applyFilters()"
+                      placeholder="Pasajero, ruta, factura..."
+                      class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <!-- Filtro Territorio -->
+                  <div>
+                    <select
+                      id="filter-territorio"
+                      onchange="applyFilters()"
+                      class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+                    >
+                      <option value="">Cualquier Territorio</option>
+                      <option value="Nacional">Nacional</option>
+                      <option value="Internacional">Internacional</option>
+                      <option value="N/A">Abonos / Administrativo (N/A)</option>
+                    </select>
+                  </div>
+                  <!-- Filtro Mes -->
+                  <div>
+                    <select
+                      id="filter-mes"
+                      onchange="applyFilters()"
+                      class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+                    >
+                      <option value="">Cualquier Mes</option>
+                      <option value="Enero">Enero</option>
+                      <option value="Febrero">Febrero</option>
+                      <option value="Marzo">Marzo</option>
+                      <option value="Abril">Abril</option>
+                      <option value="Mayo">Mayo</option>
+                      <option value="Junio">Junio</option>
+                      <option value="Julio">Julio</option>
+                      <option value="Agosto">Agosto</option>
+                      <option value="Septiembre">Septiembre</option>
+                      <option value="Octubre">Octubre</option>
+                      <option value="Noviembre">Noviembre</option>
+                      <option value="Diciembre">Diciembre</option>
+                    </select>
+                  </div>
+                  <!-- Rango de Fechas -->
+                  <div class="flex items-center space-x-2">
+                    <input
+                      type="date"
+                      id="filter-date-start"
+                      onchange="applyFilters()"
+                      class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-[10px] outline-none"
+                    />
+                    <span class="text-xs text-slate-400">a</span>
+                    <input
+                      type="date"
+                      id="filter-date-end"
+                      onchange="applyFilters()"
+                      class="w-full bg-white border border-slate-200 rounded-xl px-2 py-2 text-[10px] outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabla -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr
+                      class="bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider border-b border-slate-200"
+                    >
+                      <th class="py-3 px-4">Mes</th>
+                      <th class="py-3 px-4">Fecha (DD/MM/AA)</th>
+                      <th class="py-3 px-4">Descripción / Pasajero</th>
+                      <th class="py-3 px-4">Territorio</th>
+                      <th class="py-3 px-4">Ruta</th>
+                      <th class="py-3 px-4">N° Factura</th>
+                      <th class="py-3 px-4 text-right">Debe (Abono $)</th>
+                      <th class="py-3 px-4 text-right">Haber (Gasto $)</th>
+                      <th class="py-3 px-4 text-right">
+                        Saldo Consolidado ($)
+                      </th>
+                      <th class="py-3 px-4 text-center">Eliminar</th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    id="transactions-tbody"
+                    class="divide-y divide-slate-100 text-xs text-slate-700"
+                  >
+                    <!-- Dinámico -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Estado de búsqueda vacía -->
+              <div
+                id="table-empty-state"
+                class="hidden text-center py-12 text-slate-400 space-y-2"
+              >
+                <i
+                  class="fa-solid fa-circle-question text-3xl text-slate-300"
+                ></i>
+                <p class="text-sm font-semibold">
+                  No se encontraron transacciones
+                </p>
+                <p class="text-xs">
+                  Modifique los filtros o agregue nuevos registros contables.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. VISTA: SOPORTE Y CHAT (CENTRO DE CONSULTAS) -->
+          <div id="view-soporte" class="hidden space-y-6">
+            <!-- Tarjeta de Instrucción del Soporte -->
+            <div
+              class="bg-emerald-50/50 border border-emerald-100 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+            >
+              <div class="flex items-start sm:items-center space-x-3">
+                <div class="bg-emerald-100 text-emerald-700 p-2.5 rounded-xl">
+                  <i class="fa-solid fa-headset text-lg animate-bounce"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">
+                    Canal Directo de Soporte Humboldt
+                  </h3>
+                  <p class="text-xs text-slate-600">
+                    Resuelva dudas de inmediato. Este chat simula la atención
+                    para consolidación o errores en PDF.
+                  </p>
+                </div>
+              </div>
+              <div class="flex space-x-2">
+                <button
+                  onclick="simulateTicketInflow()"
+                  class="bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold px-3.5 py-2 rounded-xl transition shadow-md"
+                >
+                  Simular Mensaje Nuevo
+                </button>
+              </div>
+            </div>
+
+            <!-- Split Chat View -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[500px]">
+              <!-- Lista de Conversaciones (Sidebar de Chat) -->
+              <div
+                class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden"
+              >
+                <div
+                  class="p-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between shrink-0"
+                >
+                  <span class="text-xs font-bold text-slate-800"
+                    >Tickets de Soporte</span
+                  >
+                  <span
+                    class="bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-bold"
+                    >Activo</span
+                  >
+                </div>
+
+                <div class="flex-1 overflow-y-auto divide-y divide-slate-100">
+                  <!-- Conversación 1 -->
+                  <button
+                    onclick="selectChat(1)"
+                    class="w-full text-left p-4 hover:bg-slate-50 transition flex items-center space-x-3 bg-blue-50/50"
+                  >
+                    <div class="relative">
+                      <div
+                        class="h-10 w-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-xs"
+                      >
+                        AH
+                      </div>
+                      <span
+                        class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white"
+                      ></span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex justify-between items-baseline">
+                        <span class="font-bold text-xs text-slate-900 truncate"
+                          >Agente Humboldt</span
+                        >
+                        <span class="text-[9px] text-slate-400">Ahora</span>
+                      </div>
+                      <p class="text-[11px] text-slate-500 truncate mt-0.5">
+                        Hola. Su abono de fondos por $5,000.00 ha sido
+                        consolidado con éxito.
+                      </p>
+                    </div>
+                  </button>
+
+                  <!-- Conversación 2 -->
+                  <button
+                    onclick="selectChat(2)"
+                    class="w-full text-left p-4 hover:bg-slate-50 transition flex items-center space-x-3 opacity-60"
+                  >
+                    <div
+                      class="h-10 w-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs"
+                    >
+                      TI
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex justify-between items-baseline">
+                        <span class="font-bold text-xs text-slate-900 truncate"
+                          >Tobia Isonni (Emisor)</span
+                        >
+                        <span class="text-[9px] text-slate-400">Ayer</span>
+                      </div>
+                      <p class="text-[11px] text-slate-500 truncate mt-0.5">
+                        Se emitió la factura 117846 del Fee Nacional.
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Chat Principal -->
+              <div
+                class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden h-full"
+              >
+                <!-- Header de Chat -->
+                <div
+                  class="px-6 py-3 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between shrink-0"
+                >
+                  <div class="flex items-center space-x-3">
+                    <div class="relative">
+                      <div
+                        class="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs"
+                      >
+                        AH
+                      </div>
+                      <span
+                        class="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border border-white"
+                      ></span>
+                    </div>
+                    <div>
+                      <span class="font-bold text-xs text-slate-900 block"
+                        >Soporte Técnico Agencia Humboldt</span
+                      >
+                      <span
+                        class="text-[10px] text-emerald-600 block flex items-center"
+                        ><i class="fa-solid fa-circle text-[6px] mr-1"></i> En
+                        línea</span
+                      >
+                    </div>
+                  </div>
+                  <div class="flex space-x-1.5">
+                    <button
+                      onclick="
+                        simulatePdfExtraction(1);
+                        switchView('view-extractor');
+                      "
+                      class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] px-3 py-1.5 rounded-lg font-bold transition"
+                    >
+                      Ver PDF Asociado
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Mensajes de Conversación -->
+                <div
+                  class="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/30"
+                  id="chat-messages-container"
+                >
+                  <!-- Mensaje Humboldt -->
+                  <div class="flex items-start space-x-2.5 max-w-[80%]">
+                    <div
+                      class="h-7 w-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0"
+                    >
+                      AH
+                    </div>
+                    <div
+                      class="bg-white border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 shadow-sm"
+                    >
+                      <p class="font-semibold text-blue-600 text-[10px] mb-0.5">
+                        Agencia Humboldt
+                      </p>
+                      Hola equipo de Gamma Chemical. Les acabamos de enviar las
+                      facturas 117845 (con los boletos de Leonardo Aldana y
+                      Douglas Aranguren) y la factura 117846 (con el Fee y cargo
+                      administrativo). ¿Pudieron conciliarlas en el sistema?
+                    </div>
+                  </div>
+
+                  <!-- Mensaje Gamma Chemical (Cliente) -->
+                  <div
+                    class="flex items-start justify-end space-x-2.5 max-w-[80%] ml-auto"
+                  >
+                    <div
+                      class="bg-blue-600 text-white rounded-2xl p-3 text-xs shadow-sm"
+                    >
+                      <p class="font-semibold text-blue-200 text-[10px] mb-0.5">
+                        Gamma Chemical (Tú)
+                      </p>
+                      Hola, sí. Las estamos procesando usando el módulo de
+                      extracción OCR lado a lado. Los sitemas detectaron
+                      perfectamente los boletos y los fees nacionales
+                      automáticamente.
+                    </div>
+                    <div
+                      class="h-7 w-7 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold text-[10px] shrink-0"
+                    >
+                      GC
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Input de Entrada de Chat -->
+                <form
+                  onsubmit="sendChatMessage(event)"
+                  class="p-3 border-t border-slate-200 bg-white flex items-center space-x-2 shrink-0"
+                >
+                  <input
+                    type="text"
+                    id="chat-input"
+                    placeholder="Escriba un mensaje..."
+                    class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white p-2.5 rounded-xl transition active:scale-95 shadow-md"
+                  >
+                    <i class="fa-solid fa-paper-plane text-xs"></i>
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. VISTA: GUÍA DE INSTRUCCIONES (CENTRO DE AYUDA) -->
+          <div id="view-ayuda" class="hidden space-y-6">
+            <div
+              class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6"
+            >
+              <div>
+                <h2 class="text-base font-bold text-slate-900">
+                  Manual de Uso del Sistema Humboldt Flight Control
+                </h2>
+                <p class="text-xs text-slate-400">
+                  Pasos y consideraciones para mantener el saldo de prepago
+                  cuadrado al 100%.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Paso 1 -->
+                <div
+                  class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3"
+                >
+                  <div
+                    class="bg-blue-100 text-blue-700 font-bold h-8 w-8 rounded-full flex items-center justify-center text-xs"
+                  >
+                    1
+                  </div>
+                  <h4 class="font-bold text-xs text-slate-800">
+                    Fondeo de Prepago (Debe)
+                  </h4>
+                  <p class="text-xs text-slate-500">
+                    Antes de emitir cualquier boleto con la Agencia Humboldt,
+                    registre el dinero abonado haciendo clic en
+                    <strong>"Abonar"</strong>. Esto alimentará la columna
+                    <strong>Debe</strong> y sumará al saldo.
+                  </p>
+                </div>
+
+                <!-- Paso 2 -->
+                <div
+                  class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3"
+                >
+                  <div
+                    class="bg-purple-100 text-purple-700 font-bold h-8 w-8 rounded-full flex items-center justify-center text-xs"
+                  >
+                    2
+                  </div>
+                  <h4 class="font-bold text-xs text-slate-800">
+                    Extracción de Factura PDF
+                  </h4>
+                  <p class="text-xs text-slate-500">
+                    Al recibir el PDF de la Agencia, use el
+                    <strong>Módulo Extractor</strong>. Seleccione cualquiera de
+                    los presets para simular el análisis OCR. Compare el PDF a
+                    la izquierda con los campos editables a la derecha.
+                  </p>
+                </div>
+
+                <!-- Paso 3 -->
+                <div
+                  class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3"
+                >
+                  <div
+                    class="bg-amber-100 text-amber-700 font-bold h-8 w-8 rounded-full flex items-center justify-center text-xs"
+                  >
+                    3
+                  </div>
+                  <h4 class="font-bold text-xs text-slate-800">
+                    Cálculo de Saldos en Cascada
+                  </h4>
+                  <p class="text-xs text-slate-500">
+                    El sistema recalcula en cascada de forma automática. El
+                    saldo disponible final del header y las analíticas cambiarán
+                    al instante para prevenir estados negativos.
+                  </p>
+                </div>
+              </div>
+
+              <!-- FAQ y Ayuda Técnica -->
+              <div class="border-t border-slate-100 pt-6 space-y-4">
+                <h4 class="font-bold text-xs text-slate-800">
+                  Preguntas Frecuentes
+                </h4>
+                <div class="space-y-3 text-xs">
+                  <div
+                    class="bg-slate-50 p-3.5 rounded-xl border border-slate-200"
+                  >
+                    <span class="font-bold text-slate-900 block"
+                      >¿Qué significa la alerta roja en el header?</span
+                    >
+                    <span class="text-slate-600 block mt-1"
+                      >El saldo consolidado ha caído por debajo de $0.00. La
+                      Agencia de Viajes suspenderá la emisión de boletos
+                      inmediatamente hasta registrar un nuevo abono.</span
+                    >
+                  </div>
+                  <div
+                    class="bg-slate-50 p-3.5 rounded-xl border border-slate-200"
+                  >
+                    <span class="font-bold text-slate-900 block"
+                      >¿Cómo se detecta el territorio (Nacional o Internacional)
+                      automáticamente?</span
+                    >
+                    <span class="text-slate-600 block mt-1"
+                      >El extractor analiza los códigos de aeropuertos en la
+                      descripción de ruta (ej. MAR/CCS). Si ambos aeropuertos
+                      pertenecen al territorio venezolano, se marcará
+                      automáticamente como "Nacional".</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- MODALES DE OPERACIÓN -->
+
+    <!-- MODAL DE ABONO -->
+    <div
+      id="modal-abono"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center opacity-0 pointer-events-none transition-all duration-200"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 transform scale-95 transition-all duration-200"
+      >
+        <div
+          class="flex justify-between items-center pb-2 border-b border-slate-100"
+        >
+          <h3
+            class="text-sm font-bold text-slate-900 flex items-center space-x-2"
+          >
+            <i class="fa-solid fa-hand-holding-dollar text-emerald-600"></i>
+            <span>Registrar Abono Preventivo</span>
+          </h3>
+          <button
+            onclick="closeModal('modal-abono')"
+            class="text-slate-400 hover:text-slate-600 text-lg"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form onsubmit="saveManualAbono(event)" class="space-y-4">
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+              >Monto del Abono ($) *</label
+            >
+            <input
+              type="number"
+              step="0.01"
+              required
+              id="abono-monto"
+              placeholder="Ej: 5000.00"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+              >Fecha del Abono *</label
+            >
+            <input
+              type="date"
+              required
+              id="abono-fecha"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+              >Empresa / Destinatario *</label
+            >
+            <input
+              type="text"
+              required
+              id="abono-proveedor"
+              placeholder="Ej: AGENCIA DE VIAJES HUMBOLDT"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+              >Comentarios o Referencia (Opcional)</label
+            >
+            <input
+              type="text"
+              id="abono-descripcion"
+              placeholder="Ej: Transferencia Mercantil Ref-1294812"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+          <div class="pt-2 flex justify-end space-x-2">
+            <button
+              type="button"
+              onclick="closeModal('modal-abono')"
+              class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-xl"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-md"
+            >
+              Registrar Abono
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL DE REGISTRO MANUAL DE BOLETOS -->
+    <div
+      id="modal-vuelo-manual"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex justify-center items-center opacity-0 pointer-events-none transition-all duration-200"
+    >
+      <div
+        class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-md w-full p-6 space-y-4 transform scale-95 transition-all duration-200"
+      >
+        <div
+          class="flex justify-between items-center pb-2 border-b border-slate-100"
+        >
+          <h3
+            class="text-sm font-bold text-slate-900 flex items-center space-x-2"
+          >
+            <i class="fa-solid fa-plane text-blue-600"></i>
+            <span>Registrar Boleto Manual</span>
+          </h3>
+          <button
+            onclick="closeModal('modal-vuelo-manual')"
+            class="text-slate-400 hover:text-slate-600 text-lg"
+          >
+            &times;
+          </button>
+        </div>
+
+        <form onsubmit="saveManualVuelo(event)" class="space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+                >Fecha de Emisión *</label
+              >
+              <input
+                type="date"
+                required
+                id="vuelo-fecha"
+                onchange="autoFillMes()"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+                >Mes Automático</label
+              >
+              <input
+                type="text"
+                readonly
+                id="vuelo-mes"
+                class="w-full bg-slate-50 border border-slate-200 text-slate-400 rounded-xl px-3 py-2.5 text-xs outline-none"
+              />
+            </div>
+          </div>
+          <div>
+            <label
+              class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+              >Pasajero / Descripción *</label
+            >
+            <input
+              type="text"
+              required
+              id="vuelo-pasajero"
+              placeholder="Ej: ALDANA/LEONARDO"
+              class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+                >Territorio</label
+              >
+              <select
+                id="vuelo-territorio"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="Nacional">Nacional</option>
+                <option value="Internacional">Internacional</option>
+              </select>
+            </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+                >Ruta (Origen/Destino)</label
+              >
+              <input
+                type="text"
+                id="vuelo-ruta"
+                placeholder="Ej: CCS-MIA"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label
+                class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+                >N° de Factura</label
+              >
+              <input
+                type="text"
+                id="vuelo-nrofact"
+                placeholder="Ej: 117845"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+            <div>
+              <label
+                class="block text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider"
+                >Costo del Boleto ($) *</label
+              >
+              <input
+                type="number"
+                step="0.01"
+                required
+                id="vuelo-monto"
+                placeholder="Ej: 97.00"
+                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </div>
+          </div>
+          <div class="pt-2 flex justify-end space-x-2">
+            <button
+              type="button"
+              onclick="closeModal('modal-vuelo-manual')"
+              class="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-800 hover:bg-slate-50 rounded-xl"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition shadow-md"
+            >
+              Guardar Registro
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- CORE JAVASCRIPT CON TODA LA LÓGICA DE NEGOCIO CORPORATIVA -->
+    <script>
+      // --- BASE DE DATOS LOCAL (PERSISTENCIA LOCALSTORAGE) ---
+      let baseData = [];
+      let extractedPendingData = [];
+      let currentZoom = 100;
+      let chartBarInstance = null;
+      let chartPieInstance = null;
+
+      // Semillas Iniciales Contables de Gamma Chemical Corp
+      const initialSeeds = [
+        {
+          id: "s1",
+          mes: "Marzo",
+          fecha: "2026-03-01",
+          descripcion: "ABONO INICIAL PREPAGO GAMMA CHEMICAL CORP",
+          territorio: "N/A",
+          ruta: "N/A",
+          nro_fact: "Ref-001924",
+          debe: 5000.0,
+          haber: 0.0,
+          saldo: 5000.0,
+        },
+        {
+          id: "s2",
+          mes: "Marzo",
+          fecha: "2026-03-10",
+          descripcion: "BOLETO EMITIDO ROJAS/ANGEL",
+          territorio: "Nacional",
+          ruta: "CCS/PMV",
+          nro_fact: "117840",
+          debe: 0.0,
+          haber: 85.0,
+          saldo: 4915.0,
+        },
+        {
+          id: "s3",
+          mes: "Marzo",
+          fecha: "2026-03-11",
+          descripcion: "BOLETO EMITIDO PEREZ/CARLOS",
+          territorio: "Internacional",
+          ruta: "CCS/MIA",
+          nro_fact: "117842",
+          debe: 0.0,
+          haber: 550.0,
+          saldo: 4365.0,
+        },
+      ];
+
+      const mesesNombres = [
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
+      ];
+
+      function getMesNameFromDate(dateStr) {
+        if (!dateStr) return "N/A";
+        const dateObj = new Date(dateStr);
+        const utcMonth = dateObj.getUTCMonth();
+        return mesesNombres[utcMonth];
+      }
+
+      // --- MANEJO DE VISTAS (Navegación del Sidebar) ---
+      function switchView(viewId) {
+        // Esconder todas las vistas
+        document.getElementById("view-dashboard").classList.add("hidden");
+        document.getElementById("view-extractor").classList.add("hidden");
+        document.getElementById("view-historial").classList.add("hidden");
+        document.getElementById("view-soporte").classList.add("hidden");
+        document.getElementById("view-ayuda").classList.add("hidden");
+
+        // Mostrar vista seleccionada
+        document.getElementById(viewId).classList.remove("hidden");
+
+        // Cambiar titulo en Header
+        const viewTitles = {
+          "view-dashboard": "Dashboard de Consolidación Financiera",
+          "view-extractor": "Extractor Inteligente de Facturas PDF",
+          "view-historial": "Historial de Transacciones Corporativas",
+          "view-soporte": "Centro de Mensajes & Soporte Técnico",
+          "view-ayuda": "Instrucciones & Manual de Procedimientos",
+        };
+        document.getElementById("view-title").innerText =
+          viewTitles[viewId] || "Humboldt Flight Control";
+
+        // Desmarcar botones del sidebar
+        const navIds = [
+          "nav-dashboard",
+          "nav-extractor",
+          "nav-historial",
+          "nav-soporte",
+          "nav-ayuda",
+        ];
+        navIds.forEach((id) => {
+          const btn = document.getElementById(id);
+          if (btn) {
+            btn.className =
+              "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all duration-150";
+          }
+        });
+
+        // Marcar botón activo
+        const activeNavBtn = document.getElementById(
+          viewId.replace("view-", "nav-"),
+        );
+        if (activeNavBtn) {
+          activeNavBtn.className =
+            "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-white bg-slate-800 hover:bg-slate-800 transition-all duration-150";
+        }
+      }
+
+      // --- SISTEMA PERSISTENTE DE ALMACENAMIENTO ---
+      function loadData() {
+        const data = localStorage.getItem(
+          "humboldt_control_transacciones_2026",
+        );
+        if (data) {
+          baseData = JSON.parse(data);
+        } else {
+          baseData = [...initialSeeds];
+          saveDataToStorage();
+        }
+        recalculateSaldos();
+        renderAll();
+      }
+
+      function saveDataToStorage() {
+        localStorage.setItem(
+          "humboldt_control_transacciones_2026",
+          JSON.stringify(baseData),
+        );
+      }
+
+      function clearDatabase() {
+        if (
+          confirm(
+            "¿Está completamente seguro de formatear el historial contable? Esto eliminará todo registro anterior.",
+          )
+        ) {
+          baseData = [];
+          saveDataToStorage();
+          recalculateSaldos();
+          renderAll();
+        }
+      }
+
+      function recalculateSaldos() {
+        // Ordenamiento por fecha para no quebrar la lógica en cascada
+        baseData.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+        let currentAccum = 0;
+        baseData = baseData.map((row) => {
+          const debe = parseFloat(row.debe) || 0;
+          const haber = parseFloat(row.haber) || 0;
+          currentAccum = currentAccum + debe - haber;
+          return {
+            ...row,
+            saldo: currentAccum,
+          };
+        });
+        saveDataToStorage();
+      }
+
+      // --- CONTROL DE MODALES ---
+      function openModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.remove("opacity-0", "pointer-events-none");
+        modal.querySelector(".transform").classList.remove("scale-95");
+
+        if (id === "modal-abono") {
+          document.getElementById("abono-fecha").value = new Date()
+            .toISOString()
+            .substring(0, 10);
+        } else if (id === "modal-vuelo-manual") {
+          document.getElementById("vuelo-fecha").value = new Date()
+            .toISOString()
+            .substring(0, 10);
+          autoFillMes();
+        }
+      }
+
+      function closeModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.add("opacity-0", "pointer-events-none");
+        modal.querySelector(".transform").classList.add("scale-95");
+      }
+
+      function autoFillMes() {
+        const dateVal = document.getElementById("vuelo-fecha").value;
+        document.getElementById("vuelo-mes").value =
+          getMesNameFromDate(dateVal);
+      }
+
+      // --- GUARDADO DE REGISTROS ---
+      function saveManualAbono(e) {
+        e.preventDefault();
+        const monto = parseFloat(document.getElementById("abono-monto").value);
+        const fecha = document.getElementById("abono-fecha").value;
+        const proveedor = document.getElementById("abono-proveedor").value;
+        const desc =
+          document.getElementById("abono-descripcion").value ||
+          "Fondeo de Cuenta";
+
+        const newRow = {
+          id: "abono_" + Date.now(),
+          mes: getMesNameFromDate(fecha),
+          fecha: fecha,
+          descripcion: `ABONO: ${proveedor.toUpperCase()} - ${desc}`,
+          territorio: "N/A",
+          ruta: "N/A",
+          nro_fact: "Abono",
+          debe: monto,
+          haber: 0.0,
+          saldo: 0.0,
+        };
+
+        baseData.push(newRow);
+        recalculateSaldos();
+        renderAll();
+        closeModal("modal-abono");
+
+        document.getElementById("abono-monto").value = "";
+        document.getElementById("abono-proveedor").value = "";
+        document.getElementById("abono-descripcion").value = "";
+      }
+
+      function saveManualVuelo(e) {
+        e.preventDefault();
+        const fecha = document.getElementById("vuelo-fecha").value;
+        const pasajero = document
+          .getElementById("vuelo-pasajero")
+          .value.toUpperCase();
+        const territorio = document.getElementById("vuelo-territorio").value;
+        const ruta =
+          document.getElementById("vuelo-ruta").value.toUpperCase() || "N/A";
+        const nrofact = document.getElementById("vuelo-nrofact").value || "S/N";
+        const monto = parseFloat(document.getElementById("vuelo-monto").value);
+
+        const newRow = {
+          id: "vuelo_" + Date.now(),
+          mes: getMesNameFromDate(fecha),
+          fecha: fecha,
+          descripcion: `BOLETO EMITIDO ${pasajero}`,
+          territorio: territorio,
+          ruta: ruta,
+          nro_fact: nrofact,
+          debe: 0.0,
+          haber: monto,
+          saldo: 0.0,
+        };
+
+        baseData.push(newRow);
+        recalculateSaldos();
+        renderAll();
+        closeModal("modal-vuelo-manual");
+
+        document.getElementById("vuelo-pasajero").value = "";
+        document.getElementById("vuelo-ruta").value = "";
+        document.getElementById("vuelo-nrofact").value = "";
+        document.getElementById("vuelo-monto").value = "";
+      }
+
+      // --- SISTEMA DE SIMULACIÓN OCR PARA FACTURAS HUMBOLDT ---
+      const preset117845 = {
+        filename: "90. D. ARANGUREN L. ALDANA $214.pdf (Pág 1)",
+        invoiceNum: "117845",
+        date: "2026-03-13",
+        total: 194.0,
+        items: [
+          {
+            id_ext: "ext_p1",
+            desc: "AW 3640540178369 MAR/CCS ALDANA/LEONARDO",
+            rate: 73.88,
+            taxes: 23.12,
+            amount: 97.0,
+            ruta: "MAR/CCS",
+            pasajero: "ALDANA/LEONARDO",
+          },
+          {
+            id_ext: "ext_p2",
+            desc: "AW 3640540178370 MAR/CCS ARANGUREN/DOUGLAS",
+            rate: 73.88,
+            taxes: 23.12,
+            amount: 97.0,
+            ruta: "MAR/CCS",
+            pasajero: "ARANGUREN/DOUGLAS",
+          },
+        ],
+      };
+
+      const preset117846 = {
+        filename: "90. D. ARANGUREN L. ALDANA $214.pdf (Pág 2)",
+        invoiceNum: "117846",
+        date: "2026-03-13",
+        total: 20.0,
+        items: [
+          {
+            id_ext: "ext_p3",
+            desc: "FEE BOLETO NACIONAL FACTURA 117845",
+            rate: 10.0,
+            taxes: 0.0,
+            amount: 10.0,
+            ruta: "N/A",
+            pasajero: "FEE NACIONAL",
+          },
+          {
+            id_ext: "ext_p4",
+            desc: "FVE MT",
+            rate: 10.0,
+            taxes: 0.0,
+            amount: 10.0,
+            ruta: "N/A",
+            pasajero: "CARGO ADMINISTRATIVO",
+          },
+        ],
+      };
+
+      const nacionalCodes = [
+        "CCS",
+        "MAR",
+        "PMV",
+        "PZO",
+        "MUN",
+        "BLA",
+        "STD",
+        "VIG",
+        "LSP",
+      ];
+      function autoDetectTerritory(ruta, desc) {
+        if (!ruta || ruta === "N/A") {
+          if (desc.toUpperCase().includes("NACIONAL")) return "Nacional";
+          if (desc.toUpperCase().includes("INTERNACIONAL"))
+            return "Internacional";
+          return "N/A";
+        }
+        const codes = ruta.replace("-", "/").split("/");
+        if (codes.length === 2) {
+          const or = codes[0].trim();
+          const dest = codes[1].trim();
+          if (nacionalCodes.includes(or) && nacionalCodes.includes(dest)) {
+            return "Nacional";
+          }
+          return "Internacional";
+        }
+        return "Nacional";
+      }
+
+      function simulatePdfExtraction(presetNum) {
+        const data = presetNum === 1 ? preset117845 : preset117846;
+
+        // Render de Simulación de PDF (Lado izquierdo)
+        document.getElementById("pdf-empty-state").classList.add("hidden");
+        document
+          .getElementById("pdf-rendered-sheet")
+          .classList.remove("hidden");
+        document.getElementById("pdf-filename").innerText = data.filename;
+        document.getElementById("pdf-render-invoice-num").innerText =
+          data.invoiceNum;
+        document.getElementById("pdf-render-invoice-date").innerText =
+          "13/03/2026";
+        document.getElementById("pdf-render-total").innerText =
+          `$${data.total.toFixed(2)}`;
+
+        const tbody = document.getElementById("pdf-render-tbody");
+        tbody.innerHTML = "";
+        data.items.forEach((item) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+                    <td class="p-1.5 font-mono text-slate-700">${item.desc}</td>
+                    <td class="p-1.5 text-right font-mono">${item.rate.toFixed(2)}</td>
+                    <td class="p-1.5 text-right font-mono">${item.taxes.toFixed(2)}</td>
+                    <td class="p-1.5 text-right font-mono font-bold text-slate-950">${item.amount.toFixed(2)}</td>
+                `;
+          tbody.appendChild(tr);
+        });
+
+        // Poblar Formulario Humano (Lado derecho)
+        document.getElementById("extraction-empty").classList.add("hidden");
+        document
+          .getElementById("extracted-rows-container")
+          .classList.remove("hidden");
+
+        const container = document.getElementById("extracted-rows-container");
+        container.innerHTML = "";
+
+        extractedPendingData = data.items.map((item) => {
+          const detTerr = autoDetectTerritory(item.ruta, item.desc);
+          return {
+            temp_id: item.id_ext,
+            fecha: data.date,
+            nro_fact: data.invoiceNum,
+            pasajero: item.pasajero,
+            descripcion: item.desc,
+            ruta: item.ruta,
+            territorio: detTerr,
+            haber: item.amount,
+          };
+        });
+
+        renderExtractionForms();
+      }
+
+      function renderExtractionForms() {
+        const container = document.getElementById("extracted-rows-container");
+        container.innerHTML = "";
+
+        extractedPendingData.forEach((row, i) => {
+          const card = document.createElement("div");
+          card.className =
+            "p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-3 relative";
+          card.innerHTML = `
+                    <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <span class="text-xs font-bold text-blue-600 flex items-center space-x-1">
+                            <i class="fa-solid fa-plane-arrival"></i>
+                            <span>Registro de Vuelo Extraído #${i + 1}</span>
+                        </span>
+                        <button onclick="removeExtractedRow('${row.temp_id}')" class="text-slate-400 hover:text-rose-600 transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase">Fecha</label>
+                            <input type="date" value="${row.fecha}" onchange="updateExtractedField('${row.temp_id}', 'fecha', this.value)" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase">N° Factura</label>
+                            <input type="text" value="${row.nro_fact}" onchange="updateExtractedField('${row.temp_id}', 'nro_fact', this.value)" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs font-mono outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold text-slate-400 uppercase">Descripción / Pasajero</label>
+                        <input type="text" value="${row.descripcion}" onchange="updateExtractedField('${row.temp_id}', 'descripcion', this.value)" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs outline-none">
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase">Ruta</label>
+                            <input type="text" value="${row.ruta}" onchange="updateExtractedField('${row.temp_id}', 'ruta', this.value)" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase">Territorio</label>
+                            <select onchange="updateExtractedField('${row.temp_id}', 'territorio', this.value)" class="w-full bg-white border border-slate-200 rounded px-1 py-1 text-xs outline-none">
+                                <option value="Nacional" ${row.territorio === "Nacional" ? "selected" : ""}>Nacional</option>
+                                <option value="Internacional" ${row.territorio === "Internacional" ? "selected" : ""}>Internacional</option>
+                                <option value="N/A" ${row.territorio === "N/A" ? "selected" : ""}>N/A</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold text-slate-400 uppercase">Haber (Costo $)</label>
+                            <input type="number" step="0.01" value="${row.haber}" onchange="updateExtractedField('${row.temp_id}', 'haber', this.value)" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-xs text-right font-bold text-slate-800 outline-none">
+                        </div>
+                    </div>
+                `;
+          container.appendChild(card);
+        });
+
+        document.getElementById("extraction-status").innerText =
+          "OCR Completo para Validación";
+        document.getElementById("extraction-status").className =
+          "bg-amber-100 text-amber-800 text-[10px] px-2.5 py-0.5 rounded-full font-bold";
+        document
+          .getElementById("btn-confirm-extraction")
+          .removeAttribute("disabled");
+        document.getElementById("extraction-summary-count").innerText =
+          extractedPendingData.length;
+      }
+
+      function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+          document.getElementById("extraction-status").innerText =
+            "Analizando PDF...";
+          setTimeout(() => {
+            simulatePdfExtraction(1);
+          }, 1000);
+        }
+      }
+
+      function updateExtractedField(tempId, field, value) {
+        extractedPendingData = extractedPendingData.map((row) => {
+          if (row.temp_id === tempId) {
+            let finalVal = value;
+            if (field === "haber") finalVal = parseFloat(value) || 0;
+            return { ...row, [field]: finalVal };
+          }
+          return row;
+        });
+        document.getElementById("extraction-summary-count").innerText =
+          extractedPendingData.length;
+      }
+
+      function removeExtractedRow(tempId) {
+        extractedPendingData = extractedPendingData.filter(
+          (row) => row.temp_id !== tempId,
+        );
+        if (extractedPendingData.length === 0) {
+          resetPdfExtractor();
+        } else {
+          renderExtractionForms();
+        }
+      }
+
+      function resetPdfExtractor() {
+        extractedPendingData = [];
+        document.getElementById("pdf-empty-state").classList.remove("hidden");
+        document.getElementById("pdf-rendered-sheet").classList.add("hidden");
+        document.getElementById("pdf-filename").innerText = "sin_archivo.pdf";
+
+        document.getElementById("extraction-empty").classList.remove("hidden");
+        document
+          .getElementById("extracted-rows-container")
+          .classList.add("hidden");
+
+        document.getElementById("extraction-status").innerText = "Sin archivo";
+        document.getElementById("extraction-status").className =
+          "bg-slate-100 text-slate-500 text-[10px] px-2.5 py-0.5 rounded-full font-bold";
+        document
+          .getElementById("btn-confirm-extraction")
+          .setAttribute("disabled", "true");
+        document.getElementById("extraction-summary-count").innerText = 0;
+      }
+
+      function saveExtractedData() {
+        if (extractedPendingData.length === 0) return;
+
+        extractedPendingData.forEach((row) => {
+          const isFee =
+            row.descripcion.toUpperCase().includes("FEE") ||
+            row.descripcion.toUpperCase().includes("FVE");
+          const newRow = {
+            id:
+              "ext_" +
+              Date.now() +
+              "_" +
+              Math.random().toString(36).substr(2, 5),
+            mes: getMesNameFromDate(row.fecha),
+            fecha: row.fecha,
+            descripcion: isFee
+              ? row.descripcion
+              : `BOLETO EMITIDO ${row.pasajero.toUpperCase()}`,
+            territorio: row.territorio,
+            ruta: row.ruta,
+            nro_fact: row.nro_fact,
+            debe: 0.0,
+            haber: row.haber,
+            saldo: 0.0,
+          };
+          baseData.push(newRow);
+        });
+
+        recalculateSaldos();
+        renderAll();
+        resetPdfExtractor();
+        alert("¡Factura Humboldt procesada, validada e insertada con éxito!");
+      }
+
+      function simulateZoom(amount) {
+        currentZoom += amount;
+        if (currentZoom < 60) currentZoom = 60;
+        if (currentZoom > 150) currentZoom = 150;
+        document.getElementById("pdf-zoom").innerText = `${currentZoom}%`;
+        document.getElementById("pdf-rendered-sheet").style.transform =
+          `scale(${currentZoom / 100})`;
+        document.getElementById("pdf-rendered-sheet").style.transformOrigin =
+          "top center";
+      }
+
+      // --- RENDER COMPLETO DE VISTAS & KPIS ---
+      function renderAll() {
+        renderKPIS();
+        applyFilters();
+        renderCharts();
+        renderPassengerStats();
+      }
+
+      function renderKPIS() {
+        const totalDebe = baseData.reduce(
+          (acc, row) => acc + (parseFloat(row.debe) || 0),
+          0,
+        );
+        const totalHaber = baseData.reduce(
+          (acc, row) => acc + (parseFloat(row.haber) || 0),
+          0,
+        );
+        const finalSaldo =
+          baseData.length > 0 ? baseData[baseData.length - 1].saldo : 0;
+
+        // Formateadores numéricos de Moneda
+        const formatCurr = (v) =>
+          `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+        document.getElementById("kpi-saldo").innerText = formatCurr(finalSaldo);
+        document.getElementById("kpi-debe").innerText = formatCurr(totalDebe);
+        document.getElementById("kpi-haber").innerText = formatCurr(totalHaber);
+
+        const countAbonos = baseData.filter((r) => r.debe > 0).length;
+        const countVuelos = baseData.filter((r) => r.haber > 0).length;
+
+        document.getElementById("kpi-count-abonos").innerText =
+          `${countAbonos} abonos registrados`;
+        document.getElementById("kpi-count-vuelos").innerText =
+          `${countVuelos} transacciones de consumo`;
+
+        // Alerta de Prepago
+        const alertBanner = document.getElementById("saldo-alert-banner");
+        const alertDot = document.getElementById("saldo-alert-dot");
+        const alertBadge = document.getElementById("saldo-alert-badge");
+        document.getElementById("header-saldo-value").innerText =
+          formatCurr(finalSaldo);
+
+        // Cambios de tendencias en Card
+        const trendLabel = document.getElementById("kpi-saldo-trend");
+
+        if (finalSaldo < 0) {
+          alertBanner.className =
+            "flex items-center space-x-3 px-4 py-2 rounded-full border border-red-200 bg-red-50 text-red-700 shadow-sm glass-panel";
+          alertDot.className = "h-3 w-3 rounded-full bg-red-600 animate-pulse";
+          alertBadge.className =
+            "text-[9px] px-2 py-0.5 rounded-full font-bold bg-red-600 text-white uppercase tracking-wider";
+          alertBadge.innerText = "Crítico";
+          trendLabel.className = "font-semibold text-rose-600 mr-1";
+          trendLabel.innerHTML =
+            '<i class="fa-solid fa-circle-exclamation"></i> Suspendido';
+        } else if (finalSaldo <= 1000) {
+          alertBanner.className =
+            "flex items-center space-x-3 px-4 py-2 rounded-full border border-amber-200 bg-amber-50 text-amber-700 shadow-sm glass-panel";
+          alertDot.className =
+            "h-3 w-3 rounded-full bg-amber-500 animate-pulse";
+          alertBadge.className =
+            "text-[9px] px-2 py-0.5 rounded-full font-bold bg-amber-500 text-white uppercase tracking-wider";
+          alertBadge.innerText = "Fondo Bajo";
+          trendLabel.className = "font-semibold text-amber-600 mr-1";
+          trendLabel.innerHTML =
+            '<i class="fa-solid fa-triangle-exclamation"></i> Riesgo';
+        } else {
+          alertBanner.className =
+            "flex items-center space-x-3 px-4 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm glass-panel";
+          alertDot.className = "h-3 w-3 rounded-full bg-emerald-500";
+          alertBadge.className =
+            "text-[9px] px-2 py-0.5 rounded-full font-bold bg-emerald-500 text-white uppercase tracking-wider";
+          alertBadge.innerText = "Estable";
+          trendLabel.className = "font-semibold text-emerald-600 mr-1";
+          trendLabel.innerHTML =
+            '<i class="fa-solid fa-circle-check"></i> Seguro';
+        }
+      }
+
+      function deleteRow(id) {
+        if (
+          confirm(
+            "¿Seguro que desea eliminar esta transacción de la caja? Se recalcularán los saldos posteriores.",
+          )
+        ) {
+          baseData = baseData.filter((row) => row.id !== id);
+          recalculateSaldos();
+          renderAll();
+        }
+      }
+
+      // --- FILTRADO INTELIGENTE ---
+      function applyFilters() {
+        const searchValue = document
+          .getElementById("filter-search")
+          .value.toLowerCase();
+        const territorioValue =
+          document.getElementById("filter-territorio").value;
+        const mesValue = document.getElementById("filter-mes").value;
+        const dateStart = document.getElementById("filter-date-start").value;
+        const dateEnd = document.getElementById("filter-date-end").value;
+
+        const filtered = baseData.filter((row) => {
+          const matchSearch =
+            row.descripcion.toLowerCase().includes(searchValue) ||
+            row.nro_fact.toLowerCase().includes(searchValue) ||
+            row.ruta.toLowerCase().includes(searchValue) ||
+            row.mes.toLowerCase().includes(searchValue);
+
+          const matchTerritorio =
+            territorioValue === "" || row.territorio === territorioValue;
+          const matchMes = mesValue === "" || row.mes === mesValue;
+
+          let matchDate = true;
+          if (dateStart) matchDate = matchDate && row.fecha >= dateStart;
+          if (dateEnd) matchDate = matchDate && row.fecha <= dateEnd;
+
+          return matchSearch && matchTerritorio && matchMes && matchDate;
+        });
+
+        const tbody = document.getElementById("transactions-tbody");
+        tbody.innerHTML = "";
+
+        if (filtered.length === 0) {
+          document
+            .getElementById("table-empty-state")
+            .classList.remove("hidden");
+        } else {
+          document.getElementById("table-empty-state").classList.add("hidden");
+
+          // Mostrar en orden cronológico inverso (lo más reciente arriba)
+          const displayRows = [...filtered].reverse();
+
+          displayRows.forEach((row) => {
+            const tr = document.createElement("tr");
+            tr.className = "hover:bg-slate-50 transition-colors";
+
+            let territoryBadge = "";
+            if (row.territorio === "Nacional") {
+              territoryBadge =
+                '<span class="bg-blue-100 text-blue-800 text-[9px] px-2.5 py-0.5 rounded-full font-bold">Nacional</span>';
+            } else if (row.territorio === "Internacional") {
+              territoryBadge =
+                '<span class="bg-purple-100 text-purple-800 text-[9px] px-2.5 py-0.5 rounded-full font-bold">Internacional</span>';
+            } else {
+              territoryBadge =
+                '<span class="bg-slate-100 text-slate-500 text-[9px] px-2 py-0.5 rounded font-mono">N/A</span>';
+            }
+
+            tr.innerHTML = `
+                        <td class="py-3 px-4 font-semibold text-slate-900">${row.mes}</td>
+                        <td class="py-3 px-4 text-slate-500 font-mono">${formatDateRegional(row.fecha)}</td>
+                        <td class="py-3 px-4 font-medium text-slate-800">${row.descripcion}</td>
+                        <td class="py-3 px-4">${territoryBadge}</td>
+                        <td class="py-3 px-4 font-mono font-bold text-slate-950">${row.ruta}</td>
+                        <td class="py-3 px-4 font-mono">${row.nro_fact}</td>
+                        <td class="py-3 px-4 text-right font-bold text-emerald-600">${row.debe > 0 ? `+ $${row.debe.toFixed(2)}` : "-"}</td>
+                        <td class="py-3 px-4 text-right font-bold text-rose-600">${row.haber > 0 ? `$${row.haber.toFixed(2)}` : "-"}</td>
+                        <td class="py-3 px-4 text-right font-bold text-slate-900">$${row.saldo.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="deleteRow('${row.id}')" class="text-slate-400 hover:text-rose-600 transition p-1">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      function formatDateRegional(dateStr) {
+        if (!dateStr) return "";
+        const [year, month, day] = dateStr.split("-");
+        return `${day}/${month}/${year}`;
+      }
+
+      // --- COMPONENTE DE GRÁFICOS (CHART.JS) ---
+      function renderCharts() {
+        // Agrupar movimientos por meses para gráficos
+        const mesesList = [
+          "Enero",
+          "Febrero",
+          "Marzo",
+          "Abril",
+          "Mayo",
+          "Junio",
+          "Julio",
+          "Agosto",
+          "Septiembre",
+          "Octubre",
+          "Noviembre",
+          "Diciembre",
+        ];
+        const sumDebe = Array(12).fill(0);
+        const sumHaber = Array(12).fill(0);
+
+        let countNac = 0;
+        let countInt = 0;
+
+        baseData.forEach((row) => {
+          const monthIdx = mesesList.indexOf(row.mes);
+          if (monthIdx !== -1) {
+            sumDebe[monthIdx] += parseFloat(row.debe) || 0;
+            sumHaber[monthIdx] += parseFloat(row.haber) || 0;
+          }
+          if (row.territorio === "Nacional") countNac++;
+          if (row.territorio === "Internacional") countInt++;
+        });
+
+        document.getElementById("txt-count-nac").innerText = countNac;
+        document.getElementById("txt-count-int").innerText = countInt;
+
+        // Gráfico de Barras Principal
+        const ctxBar = document
+          .getElementById("dashboardBarChart")
+          .getContext("2d");
+        if (chartBarInstance) chartBarInstance.destroy();
+
+        chartBarInstance = new Chart(ctxBar, {
+          type: "bar",
+          data: {
+            labels: mesesList.slice(0, 6),
+            datasets: [
+              {
+                label: "Abonos (Debe)",
+                data: sumDebe.slice(0, 6),
+                backgroundColor: "#10b981",
+                borderRadius: 8,
+              },
+              {
+                label: "Consumo Boletos (Haber)",
+                data: sumHaber.slice(0, 6),
+                backgroundColor: "#f43f5e",
+                borderRadius: 8,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "top",
+                labels: { boxWidth: 12, font: { size: 10, weight: "600" } },
+              },
+            },
+            scales: {
+              y: { beginAtZero: true, ticks: { font: { size: 9 } } },
+              x: { ticks: { font: { size: 9 } } },
+            },
+          },
+        });
+
+        // Gráfico de Torta (Donut) para Territorios
+        const ctxPie = document
+          .getElementById("dashboardPieChart")
+          .getContext("2d");
+        if (chartPieInstance) chartPieInstance.destroy();
+
+        chartPieInstance = new Chart(ctxPie, {
+          type: "doughnut",
+          data: {
+            labels: ["Nacional", "Internacional"],
+            datasets: [
+              {
+                data: [countNac, countInt],
+                backgroundColor: ["#3b82f6", "#a855f7"],
+                borderWidth: 2,
+                hoverOffset: 4,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+            },
+            cutout: "70%",
+          },
+        });
+      }
+
+      // --- SISTEMA DE PASAJEROS FRECUENTES ---
+      function renderPassengerStats() {
+        const passengerList = document.getElementById("db-passenger-list");
+        passengerList.innerHTML = "";
+
+        const stats = {};
+
+        baseData.forEach((row) => {
+          if (row.haber > 0) {
+            let name = row.descripcion
+              .replace("BOLETO EMITIDO ", "")
+              .replace("AW ", "");
+            if (
+              name.includes("FEE") ||
+              name.includes("CARGO") ||
+              name.includes("FVE")
+            )
+              return;
+
+            // Remover códigos de tickets o rutas para quedarse con el nombre limpio
+            name = name.replace(/^\d+\s+/, "");
+            name = name.replace(/^[A-Z]{3}\/[A-Z]{3}\s+/, "");
+
+            if (name) {
+              if (!stats[name]) stats[name] = { count: 0, spent: 0 };
+              stats[name].count += 1;
+              stats[name].spent += row.haber;
+            }
+          }
+        });
+
+        const sorted = Object.entries(stats).sort(
+          (a, b) => b[1].count - a[1].count,
+        );
+
+        if (sorted.length === 0) {
+          passengerList.innerHTML = `<div class="text-center py-10 text-slate-400 text-xs">Sin pasajeros registrados aún.</div>`;
+          return;
+        }
+
+        sorted.forEach(([name, data]) => {
+          const div = document.createElement("div");
+          div.className =
+            "flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 hover:border-slate-200 transition";
+          div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-blue-100 text-blue-700 h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs">
+                            ${name.charAt(0)}
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-800 text-xs block truncate max-w-[150px]">${name}</span>
+                            <span class="text-[10px] text-slate-400 font-semibold">${data.count} vuelo(s)</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-bold text-slate-950 text-xs block">$${data.spent.toFixed(2)}</span>
+                        <span class="text-[9px] text-slate-400 block uppercase font-medium">Acumulado</span>
+                    </div>
+                `;
+          passengerList.appendChild(div);
+        });
+      }
+
+      // --- EXPORTAR EXCEL (CSV COMPATIBLE CON EXCEL) ---
+      function exportDataExcelSim() {
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent +=
+          "MES,FECHA,DESCRIPCION,TERRITORIO,RUTA,NRO_FACT,DEBE,HABER,SALDO\r\n";
+
+        baseData.forEach((row) => {
+          const line = `"${row.mes}","${row.fecha}","${row.descripcion}","${row.territorio}","${row.ruta}","${row.nro_fact}",${row.debe},${row.haber},${row.saldo}`;
+          csvContent += line + "\r\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute(
+          "download",
+          "control_de_vuelos_humboldt_gamma_chemical.csv",
+        );
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // --- SISTEMA DE SOPORTE & CHAT INTEGRADO ---
+      function sendChatMessage(e) {
+        e.preventDefault();
+        const input = document.getElementById("chat-input");
+        const txt = input.value.trim();
+        if (!txt) return;
+
+        // Insertar mensaje del cliente
+        const container = document.getElementById("chat-messages-container");
+
+        const userMsg = document.createElement("div");
+        userMsg.className =
+          "flex items-start justify-end space-x-2.5 max-w-[80%] ml-auto";
+        userMsg.innerHTML = `
+                <div class="bg-blue-600 text-white rounded-2xl p-3 text-xs shadow-sm">
+                    <p class="font-semibold text-blue-200 text-[10px] mb-0.5">Gamma Chemical (Tú)</p>
+                    ${txt}
+                </div>
+                <div class="h-7 w-7 rounded-full bg-slate-700 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                    GC
+                </div>
+            `;
+        container.appendChild(userMsg);
+        input.value = "";
+        container.scrollTop = container.scrollHeight;
+
+        // Simular respuesta automatizada de Humboldt
+        setTimeout(() => {
+          const agentMsg = document.createElement("div");
+          agentMsg.className =
+            "flex items-start space-x-2.5 max-w-[80%] animate-fade-in";
+          agentMsg.innerHTML = `
+                    <div class="h-7 w-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                        AH
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 shadow-sm">
+                        <p class="font-semibold text-blue-600 text-[10px] mb-0.5">Agencia Humboldt (Respuesta Automática)</p>
+                        Hemos recibido su solicitud de consulta: "<em>${txt}</em>". Un operador de cuenta especializado verificará su estado de saldo a la brevedad. Gracias por preferirnos.
+                    </div>
+                `;
+          container.appendChild(agentMsg);
+          container.scrollTop = container.scrollHeight;
+        }, 1500);
+      }
+
+      function simulateTicketInflow() {
+        const container = document.getElementById("chat-messages-container");
+        const agentMsg = document.createElement("div");
+        agentMsg.className =
+          "flex items-start space-x-2.5 max-w-[80%] animate-bounce";
+        agentMsg.innerHTML = `
+                <div class="h-7 w-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[10px] shrink-0">
+                    AH
+                </div>
+                <div class="bg-white border border-slate-200 rounded-2xl p-3 text-xs text-slate-800 shadow-sm">
+                    <p class="font-semibold text-blue-600 text-[10px] mb-0.5">Agencia Humboldt (Agente)</p>
+                    ¡Hola! Confirmamos la recepción de un nuevo abono para la emisión de boletos por valor de $2,000.00. ¿Podrían registrarlo en el sistema?
+                </div>
+            `;
+        container.appendChild(agentMsg);
+        container.scrollTop = container.scrollHeight;
+
+        // Sonido o alerta visual rápida
+        document.getElementById("chat-badge").innerText = "1";
+        document.getElementById("chat-badge").classList.remove("hidden");
+      }
+
+      function selectChat(id) {
+        alert(`Cambiando al ticket número ${id}.`);
+        document.getElementById("chat-badge").classList.add("hidden");
+      }
+
+      // --- SISTEMAS AUXILIARES ---
+      function toggleDropdown(id) {
+        const el = document.getElementById(id);
+        el.classList.toggle("hidden");
+      }
+
+      function changeLanguage(lang) {
+        document.getElementById("current-lang").innerText = `${lang} (Sím)`;
+        document.getElementById("lang-dropdown").classList.add("hidden");
+        alert(
+          `Idioma cambiado simbólicamente a: ${lang === "ES" ? "Español" : "English"}`,
+        );
+      }
+
+      function toggleMobileMenu() {
+        const el = document.getElementById("mobile-menu");
+        el.classList.toggle("hidden");
+      }
+
+      function openConfig() {
+        alert(
+          "Ajustes del Sistema:\n- Límite de Alerta Amarilla: $1,000.00\n- Extracción OCR: Automático",
+        );
+      }
+
+      function logoutSim() {
+        if (
+          confirm("¿Seguro que desea salir del panel Humboldt Flight Control?")
+        ) {
+          alert("Sesión simulada cerrada.");
+        }
+      }
+
+      // --- INICIALIZACIÓN ---
+      window.onload = function () {
+        loadData();
+      };
+    </script>
+  </body>
+</html>
